@@ -12,4 +12,4 @@ client.connect()
   .then(() => (console.log('connected to database')))
   .catch((err) => (console.log(err)));
 
-// module.exports = db;
+module.exports = client;

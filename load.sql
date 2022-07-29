@@ -40,11 +40,11 @@ FROM '/home/albert/Seip2205/SDC/Thorium-QA/csv/answers_photos.csv'
 DELIMITER ','
 CSV HEADER;
 
-INSERT INTO "user" (email, username) select asker_email as email, asker_name as username from question_transform
+INSERT INTO "user" (email, username) SELECT asker_email AS email, asker_name AS username FROM question_transform
 UNION
-select answerer_email as email, answerer_name as username from answer_transform;
+SELECT answerer_email AS email, answerer_name AS username FROM answer_transform;
 
-INSERT INTO photo SELECT id::INT, answer_id, "url" FROM photo_transform;
+INSERT INTO photo SELECT id::INT, answer_id::INT, "url" FROM photo_transform;
 
 INSERT INTO question (id, product_id, user_id, question_body, question_date, question_helpfulness, reported)
 SELECT q.id::INT, q.product_id::INT, u.id::INT, q.body, TO_TIMESTAMP(q.date_written::BIGINT / 1000), q.helpful::INT, q.reported::BOOLEAN FROM "user" u INNER JOIN question_transform q ON u.email = q.asker_email AND u.username = q.asker_name
@@ -52,4 +52,4 @@ SELECT q.id::INT, q.product_id::INT, u.id::INT, q.body, TO_TIMESTAMP(q.date_writ
 INSERT INTO answer (id, question_id, user_id, answer_body, answer_date, answer_helpfulness, reported)
 SELECT a.id::INT, a.question_id::INT, u.id::INT, a.body, TO_TIMESTAMP(a.date_written::BIGINT / 1000), a.helpful::INT, a.reported::BOOLEAN FROM "user" u INNER JOIN answer_transform a ON u.email = a.answerer_email AND u.username = a.answerer_name
 
-
+SELECT q.id, q.product_id, u.id, q.body, q.question_date, q.question_helpfulness, q.reported FROM "user" u INNER JOIN question q ON u.email = q.asker_email AND u.username = q.asker_name
