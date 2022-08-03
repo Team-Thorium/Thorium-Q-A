@@ -1,7 +1,8 @@
 CREATE TABLE "user" (
   id SERIAL PRIMARY KEY,
-  username VARCHAR(50),
-  email VARCHAR(255)
+  "name" VARCHAR(50),
+  email VARCHAR(255),
+  CONSTRAINT unique_idx UNIQUE ("name", email)
 );
 CREATE TABLE question (
   id SERIAL PRIMARY KEY,
@@ -30,42 +31,67 @@ CREATE TABLE photo (
   "url" VARCHAR(255)
 );
 
-
-create view question_view as SELECT
-
-    SELECT row_to_json(questionResult) from
-    (select
-      q.id,
-      q.question_body,
-      q.question_date,
-      u.username,
-      q.reported,
-      q.question_helpfulness,
-      (select
-        json_object_agg(dog.id, -- first parameter is what you want as the key*
-          (select row_to_json(answerResult) from -- row_to_json converts all rows json format
-            (select a.id, a.answer_body, a.answer_date, a.answer_helpfulness, a.reported, u.username,
-            (SELECT array_agg("url") FROM photo p WHERE p.answer_id = a.id) as photos
-            from answer a LEFT JOIN "user" u ON a.user_id = u.id where a.id = dog.id) as answerResult -- this select statement is what you want as the row (or value as initial key*)
-          )
-        )
-    from answer dog
-    where dog.question_id = q.id AND dog.reported = false) as answers
-    FROM question q
-    LEFT JOIN "user" u
-    ON q.user_id = u.id
-    WHERE q.product_id = 1
-    AND q.reported = false) as questionResult
+    -- SELECT row_to_json(questionResult) FROM
+    -- (SELECT
+    --   q.id,
+    --   q.question_body,
+    --   q.question_date,
+    --   u.username,
+    --   q.reported,
+    --   q.question_helpfulness,
+    --   (SELECT
+    --     json_object_agg(av.id,
+    --       (SELECT row_to_json(answerResult) FROM
+    --         (SELECT a.id, a.answer_body, a.answer_date, a.answer_helpfulness, a.reported, u.username,
+    --         (SELECT array_agg("url") FROM photo p WHERE p.answer_id = a.id) AS photos
+    --         FROM answer a LEFT JOIN "user" u ON a.user_id = u.id WHERE a.id = av.id) AS answerResult
+    --       )
+    --     )
+    -- FROM answer av
+    -- WHERE av.question_id = q.id AND av.reported = false) AS answers
+    -- FROM question q
+    -- LEFT JOIN "user" u
+    -- ON q.user_id = u.id
+    -- WHERE q.product_id = 6000
+    -- AND q.reported = false) AS questionResult
 
 
 
-  -- create view answer_view as select
+  -- create or replace view answer_view AS
+  --   SELECT
   --       json_object_agg(dog.id, -- first parameter is what you want as the key*
-  --         (select row_to_json(answerResult) from -- row_to_json converts all rows json format
+  --         (select row_to_json(answerResult) FROM -- row_to_json converts all rows json format
   --           (select a.id, a.answer_body, a.answer_date, a.answer_helpfulness, a.reported, u.username,
   --           (SELECT array_agg("url") FROM photo p WHERE p.answer_id = a.id) as photos
   --           from answer a LEFT JOIN "user" u ON a.user_id = u.id where a.id = dog.id) as answerResult -- this select statement is what you want as the row (or value as initial key*)
   --         )
   --       )
-  --   from answer dog
+  --   FROM answer dog
   --   where dog.question_id = 1;
+  --   grouped by question_id
+
+-- create view answer_view as
+-- (SELECT
+--         json_object_agg(av.id,
+--           (SELECT row_to_json(answerResult) FROM
+--             (SELECT a.id, a.answer_body, a.answer_date, a.answer_helpfulness, a.reported, u.username,
+--             (SELECT array_agg("url") FROM photo p WHERE p.answer_id = a.id) AS photos
+--             FROM answer a LEFT JOIN "user" u ON a.user_id = u.id WHERE a.id = av.id) AS answerResult
+--           )
+--         )
+--     FROM answer av
+--     WHERE av.question_id = q.id AND av.reported = false) AS answers
+
+
+    -- 'SELECT\
+    --   u.username,\
+    --   q.id,\
+    --   q.question_body,\
+    --   q.question_date,\
+    --   q.question_helpfulness,\
+    --   q.reported\
+    -- FROM question q\
+    -- LEFT JOIN "user" u\
+    -- ON q.user_id = u.id\
+    -- WHERE q.product_id = 1\
+    -- AND q.reported = false'
