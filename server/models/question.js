@@ -1,6 +1,6 @@
 const db = require('../db');
 module.exports = {
-  getAll: (product_id, count, page) => {
+  get: (product_id, count, page) => {
     const queryString = `SELECT json_agg(questionResult) AS result FROM (SELECT
       q.id AS question_id,
       q.question_body,
@@ -11,7 +11,8 @@ module.exports = {
       (SELECT
         COALESCE (json_object_agg(av.id,
           (SELECT row_to_json(answerResult) FROM
-            (SELECT a.id, a.answer_body AS body, a.answer_date AS date, u."name" AS answerer_name, a.answer_helpfulness AS helpfulness,
+
+            (SELECT a.id, a.reported, a.answer_body AS body, a.answer_date AS date, u."name" AS answerer_name, a.answer_helpfulness AS helpfulness,
             (SELECT COALESCE(json_agg("url"), '[]'::json) FROM photo p WHERE p.answer_id = a.id) AS photos
             FROM answer a LEFT JOIN "user" u ON a.user_id = u.id WHERE a.id = av.id) AS answerResult)), '{}'::json)
     FROM answer av
@@ -23,11 +24,11 @@ module.exports = {
     AND q.reported = false ORDER BY q.question_helpfulness DESC limit $2 offset $3) AS questionResult`;
     return db.query(queryString, [product_id, count, page]);
   },
-  post: async (product_id, data) => {
+  post: async (data) => {
     const {
-      email, name, body,
+      email, name, body, product_id,
     } = data;
-    console.log(typeof product_id)
+
     const queryUser = 'INSERT INTO "user" ("name", email) VALUES ($1, $2) ON CONFLICT (name, email) DO NOTHING;';
     const queryQuestion = `INSERT INTO question (product_id, user_id, question_body, question_date, question_helpfulness, reported)
     VALUES ($1, (SELECT id FROM "user" WHERE "name" = $2 AND email = $3 limit 1), $4, (SELECT NOW()), 0, false);`;

@@ -3,17 +3,17 @@ const models = require('../models');
 module.exports = {
   get: (req, res) => {
     const product_id = req.query.product_id;
-    const count = req.query.count || 5;
-    const page = req.query.page || 0;
+    const count = req.params.count || 5;
+    const page = req.params.page || 0;
     const data = {};
     data.product_id = product_id;
-    console.log(product_id);
-    models.question.getAll(product_id, count, page)
+    // console.log(product_id);
+    models.question.get(product_id, count, page)
       .then((results) => {
         const data = {};
         data.product_id = product_id;
         data.results = results.rows[0].result;
-        res.json(data);
+        res.send(data);
       })
       .catch((err) => {
         console.log('get all models error', err);
@@ -21,8 +21,7 @@ module.exports = {
       });
   },
   post: (req, res) => {
-    const question_id = req.params.id;
-    models.question.post(question_id, req.body)
+    models.question.post(req.body)
       .then(() => {
         res.sendStatus(201);
       })

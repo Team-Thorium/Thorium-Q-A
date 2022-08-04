@@ -24,7 +24,6 @@ CREATE TABLE answer (
   reported BOOLEAN
 );
 
-
 CREATE TABLE photo (
   id SERIAL PRIMARY KEY,
   answer_id INT REFERENCES answer(id),
@@ -83,17 +82,17 @@ CREATE TABLE photo (
     -- WHERE q.product_id = 1\
     -- AND q.reported = false'
 
-  SELECT json_agg(answerResult) AS result
-  FROM
-  (SELECT
-  dog.question_id,
-	dog.id as answer_id,
-	dog.answer_body,
-	dog.answer_date,
-	u."name" as answerer_name,
-	dog.answer_helpfulness,
-	(SELECT jsonb_agg(photo) from (SELECT id, "url" from photo where answer_id = dog.id ) as photo )
-	FROM answer dog
- 	LEFT JOIN "user" u
-	ON dog.user_id = u.id
-  WHERE dog.question_id = 1 limit 100) as answerResult;
+  -- SELECT json_agg(answerResult) AS result
+  -- FROM
+  -- (SELECT
+  -- dog.question_id,
+	-- dog.id as answer_id,
+	-- dog.answer_body,
+	-- dog.answer_date,
+	-- u."name" as answerer_name,
+	-- dog.answer_helpfulness,
+	-- (SELECT jsonb_agg(photo) from (SELECT id, "url" from photo where answer_id = dog.id ) as photo )
+	-- FROM answer dog
+ 	-- LEFT JOIN "user" u
+	-- ON dog.user_id = u.id
+  -- WHERE dog.question_id = 1 limit 100) as answerResult;

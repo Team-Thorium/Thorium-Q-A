@@ -1,6 +1,21 @@
 const db = require('../db');
 
 module.exports = {
+  get: (question_id, count, page) => {
+    const queryString = `SELECT COALESCE (json_agg(answerResult), '[]'::json) AS result
+    FROM (SELECT
+      dog.id as answer_id,
+      dog.answer_body,
+      dog.answer_date,
+      u."name" as answerer_name,
+      dog.answer_helpfulness,
+      (SELECT COALESCE(json_agg(photos), '[]'::json) from (SELECT id, "url" from photo where answer_id = dog.id ) as photos ) as Photos
+    FROM answer dog
+    LEFT JOIN "user" u
+    ON dog.user_id = u.id
+    WHERE dog.question_id = $1 AND dog.reported = false limit $2 offset $3) as answerResult;`;
+    return db.query(queryString, [question_id, count, page]);
+  },
   post: async (data, question_id) => {
     const {
       email, name, body, photos,
@@ -18,7 +33,7 @@ module.exports = {
               db.query(queryPhoto, [result.rows[0].id, url]);
             });
           }
-        })
+        });
     } catch (err) {
       console.log(err);
     }
