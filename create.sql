@@ -31,6 +31,7 @@ CREATE TABLE photo (
   "url" VARCHAR(255)
 );
 
+
     -- SELECT row_to_json(questionResult) FROM
     -- (SELECT
     --   q.id,
@@ -55,20 +56,6 @@ CREATE TABLE photo (
     -- WHERE q.product_id = 6000
     -- AND q.reported = false) AS questionResult
 
-
-
-  -- create or replace view answer_view AS
-  --   SELECT
-  --       json_object_agg(dog.id, -- first parameter is what you want as the key*
-  --         (select row_to_json(answerResult) FROM -- row_to_json converts all rows json format
-  --           (select a.id, a.answer_body, a.answer_date, a.answer_helpfulness, a.reported, u.username,
-  --           (SELECT array_agg("url") FROM photo p WHERE p.answer_id = a.id) as photos
-  --           from answer a LEFT JOIN "user" u ON a.user_id = u.id where a.id = dog.id) as answerResult -- this select statement is what you want as the row (or value as initial key*)
-  --         )
-  --       )
-  --   FROM answer dog
-  --   where dog.question_id = 1;
-  --   grouped by question_id
 
 -- create view answer_view as
 -- (SELECT
@@ -95,3 +82,18 @@ CREATE TABLE photo (
     -- ON q.user_id = u.id\
     -- WHERE q.product_id = 1\
     -- AND q.reported = false'
+
+  SELECT json_agg(answerResult) AS result
+  FROM
+  (SELECT
+  dog.question_id,
+	dog.id as answer_id,
+	dog.answer_body,
+	dog.answer_date,
+	u."name" as answerer_name,
+	dog.answer_helpfulness,
+	(SELECT jsonb_agg(photo) from (SELECT id, "url" from photo where answer_id = dog.id ) as photo )
+	FROM answer dog
+ 	LEFT JOIN "user" u
+	ON dog.user_id = u.id
+  WHERE dog.question_id = 1 limit 100) as answerResult;

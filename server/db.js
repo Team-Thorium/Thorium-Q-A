@@ -8,8 +8,6 @@ const client = new Client({
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
 });
-client.connect()
-  .then(() => (console.log('connected to database')))
-  .catch((err) => (console.log(err)));
+client.connect();
 
 module.exports = client;

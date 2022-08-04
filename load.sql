@@ -47,7 +47,7 @@ SELECT answerer_email AS email, answerer_name AS "name" FROM answer_transform;
 INSERT INTO photo SELECT id::INT, answer_id::INT, "url" FROM photo_transform;
 
 INSERT INTO question (id, product_id, user_id, question_body, question_date, question_helpfulness, reported)
-SELECT q.id::INT, q.product_id::INT, u.id::INT, q.body, TO_TIMESTAMP(q.date_written::BIGINT / 1000), q.helpful::INT, q.reported::BOOLEAN FROM "user" u INNER JOIN question_transform q ON u.email = q.asker_email AND u."name" = q.asker_name
+SELECT q.id::INT, q.product_id::INT, u.id::INT, q.body, TO_TIMESTAMP(q.date_written::BIGINT / 1000), q.helpful::INT, q.reported::BOOLEAN FROM "user" u INNER JOIN question_transform q ON u.email = q.asker_email AND u."name" = q.asker_name;
 
 INSERT INTO answer (id, question_id, user_id, answer_body, answer_date, answer_helpfulness, reported)
 SELECT a.id::INT, a.question_id::INT, u.id::INT, a.body, TO_TIMESTAMP(a.date_written::BIGINT / 1000), a.helpful::INT, a.reported::BOOLEAN FROM "user" u INNER JOIN answer_transform a ON u.email = a.answerer_email AND u."name" = a.answerer_name
@@ -56,3 +56,15 @@ SELECT setval('user_id_seq', (SELECT MAX(id) FROM "user"));
 SELECT setval('question_id_seq', (SELECT MAX(id) FROM question));
 SELECT setval('answer_id_seq', (SELECT MAX(id) FROM answer));
 SELECT setval('photo_id_seq', (SELECT MAX(id) FROM photo));
+
+create index product_id_idx on question (
+  product_id
+);
+create index question_id_idx on answer (
+  question_id
+);
+create index photo_idx on photo(
+  answer_id
+);
+create index
+
