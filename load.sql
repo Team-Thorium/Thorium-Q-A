@@ -66,5 +66,5 @@ create index question_id_idx on answer (
 create index photo_idx on photo(
   answer_id
 );
-create index
+
 
